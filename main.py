@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from botiga_db import read, create, update_units, delete_product, products_schema
+from botiga_db import product_schema, read, read_product, create, update_units, delete_product, read_all_products_info, products_schema
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -20,25 +20,35 @@ def read_root():
 def read_products():
     return products_schema(read())
 
-@app.post("/create_product")
-async def create_product(data: Product):
-    name = data.name
-    description = data.description
-    company = data.company
-    price = data.price
-    units = data.units
-    subcategory_id = data.subcategory_id
-    product_id = create(name, description, company, price, units, subcategory_id)
+@app.get("/product/{product_id}")
+def read_product_by_id(product_id: int):
+    product = read_product(product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return product_schema(product)
+
+@app.post("/product")
+async def create_new_product(data: Product):
+    product_id = create(
+        data.name, data.description, data.company, data.price, data.units, data.subcategory_id
+    )
     return {
-        "msg": "Data successfully created",
+        "msg": "Producto creado exitosamente",
         "product_id": product_id,
-        "name": name
+        "name": data.name
     }
+# El put solo modifica UNIDADES de UN producto 
+@app.put("/updateProductUnits/{product_id}")
+def update_product(product_id: int, data: Product):
+    update_units(product_id, data.units)
+    return {"msg": "Producto actualizado exitosamente"}
 
-@app.put("/update_units/{product_id}")
-def update_product_units(product_id: int, units: int):
-    update_units(product_id, units)
-
-@app.delete("/delete_product/{product_id}")
-def delete_product_endpoint(product_id: int):
+@app.delete("/product/{product_id}")
+def delete_product_by_id(product_id: int):
     delete_product(product_id)
+    return {"msg": "Producto eliminado exitosamente"}
+
+@app.get("/productAll")
+def read_all_products_info_endpoint():
+    return read_all_products_info()
+ 
