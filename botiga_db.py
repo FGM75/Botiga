@@ -95,3 +95,135 @@ def product_schema(product) -> dict:
 
 def products_schema(products) -> dict:
     return [product_schema(product) for product in products]
+
+def check_category_exists(name):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "SELECT category_id FROM category WHERE name = %s"
+        cur.execute(query, (name,))
+        category = cur.fetchone()
+        if category:
+            return category[0]
+        else:
+            return None
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
+
+def create_category(name):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "INSERT INTO category (name) VALUES (%s)"
+        cur.execute(query, (name,))
+        conn.commit()
+        category_id = cur.lastrowid
+        return category_id
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
+
+def update_category(name, category_id):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "UPDATE category SET name = %s WHERE category_id = %s"
+        cur.execute(query, (name, category_id))
+        conn.commit()
+        updated_rows = cur.rowcount
+        return updated_rows
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
+
+def check_subcategory_exists(name, category_id):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "SELECT subcategory_id FROM subcategory WHERE name = %s AND category_id = %s"
+        cur.execute(query, (name, category_id))
+        subcategory = cur.fetchone()
+        if subcategory:
+            return subcategory[0]
+        else:
+            return None
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
+
+def create_subcategory(name, category_id):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "INSERT INTO subcategory (name, category_id) VALUES (%s, %s)"
+        cur.execute(query, (name, category_id))
+        conn.commit()
+        subcategory_id = cur.lastrowid
+        return subcategory_id
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
+
+def update_subcategory(name, subcategory_id):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "UPDATE subcategory SET name = %s WHERE subcategory_id = %s"
+        cur.execute(query, (name, subcategory_id))
+        conn.commit()
+        updated_rows = cur.rowcount
+        return updated_rows
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
+
+def check_product_exists(name, subcategory_id):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "SELECT product_id FROM product WHERE name = %s AND subcategory_id = %s"
+        cur.execute(query, (name, subcategory_id))
+        product = cur.fetchone()
+        if product:
+            return product[0]
+        else:
+            return None
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
+
+def create_product(name, description, company, price, units, subcategory_id):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "INSERT INTO product (name, description, company, price, units, subcategory_id) VALUES (%s, %s, %s, %s, %s, %s)"
+        cur.execute(query, (name, description, company, price, units, subcategory_id))
+        conn.commit()
+        product_id = cur.lastrowid
+        return product_id
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
+
+def update_product(name, description, company, price, units, product_id):
+    try:
+        conn = db_client()
+        cur = conn.cursor()
+        query = "UPDATE product SET name = %s, description = %s, company = %s, price = %s, units = %s WHERE product_id = %s"
+        cur.execute(query, (name, description, company, price, units, product_id))
+        conn.commit()
+        updated_rows = cur.rowcount
+        return updated_rows
+    except Exception as e:
+        return {"status": -1, "message": f"Error de connexió:{e}" }
+    finally:
+        conn.close()
